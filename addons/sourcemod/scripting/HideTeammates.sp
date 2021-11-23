@@ -56,7 +56,7 @@ public void OnPluginStart()
 		}
 	}
 
-    AutoExecConfig(true);
+	AutoExecConfig(true);
 } 
 
 public void OnMapStart()
