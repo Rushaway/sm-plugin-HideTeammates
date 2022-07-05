@@ -405,4 +405,5 @@ public int PrefMenuHandler(Menu prefmenu, MenuAction actions, int client, int it
 	{
 		CloseHandle(prefmenu);
 	}
+	return 0;
 }
