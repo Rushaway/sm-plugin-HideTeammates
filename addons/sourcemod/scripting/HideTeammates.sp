@@ -4,6 +4,7 @@
 #include <clientprefs>
 #tryinclude <leader>
 #pragma semicolon 1
+#pragma newdecls required
 
 ConVar sm_hide_enabled, sm_hide_maximum;
 
