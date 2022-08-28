@@ -27,7 +27,7 @@ public Plugin myinfo =
 	name = "Hide Teammates",
 	author = "DarkerZ [RUS]",
 	description = "Hide players based on individual distances but ignore leader",
-	version = "1.6L",
+	version = "1.6.2",
 	url = "dark-skill.ru"
 }
 
@@ -58,6 +58,8 @@ public void OnPluginStart()
 	}
 
 	AutoExecConfig(true);
+
+	HookEvent("player_death", OnPlayerDeath);
 } 
 
 public void OnMapStart()
@@ -71,7 +73,12 @@ public void OnMapStart()
 	}
 	if(!bEnabled) return;
 
-	g_timer = CreateTimer(0.3, HideTimer, _,TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	g_timer = CreateTimer(0.3, HideTimer, _,TIMER_REPEAT);
+}
+
+public void OnMapEnd()
+{
+	delete g_timer;
 }
 
 public void OnClientPutInServer(int client) 
@@ -130,11 +137,7 @@ public void OnConVarChange(Handle hCvar, const char[] oldValue, const char[] new
 
 	if (hCvar == sm_hide_enabled)
 	{
-		if(g_timer != INVALID_HANDLE)
-		{
-			KillTimer(g_timer);
-			g_timer = INVALID_HANDLE;
-		}
+		delete g_timer;
 
 		bEnabled = sm_hide_enabled.BoolValue;
 
@@ -160,7 +163,7 @@ public void OnConVarChange(Handle hCvar, const char[] oldValue, const char[] new
 		}
 		if(bEnabled)
 		{
-			g_timer = CreateTimer(0.3, HideTimer, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+			g_timer = CreateTimer(0.3, HideTimer, _, TIMER_REPEAT);
 		}
 	}
 }
@@ -258,13 +261,6 @@ public bool SetClientHide(int client, bool hide_enable, int hide_distance)
 
 public Action HideTimer(Handle timer)
 {
-	if(timer != g_timer || !bEnabled) 
-	{
-		KillTimer(timer);
-		g_timer = INVALID_HANDLE;
-		return Plugin_Stop;
-	} 
-
 	for(int client = 1; client <= MaxClients; client++)
 	{
 		for(int target = 1; target <= MaxClients; target++)
@@ -311,6 +307,18 @@ public Action Hook_SetTransmit(int target, int client)
 		return Plugin_Handled;
 	}
 	return Plugin_Continue; 
+}
+
+void OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
+{
+	int victim = GetClientOfUserId(event.GetInt("userid"));
+	if (!victim)
+		return;
+	
+	for (int target = 1; target <= MaxClients; target++)
+	{
+		g_HidePlayers[victim][target] = false;
+	}
 }
 
 public void PrefMenu(int client, CookieMenuAction actions, any info, char[] buffer, int maxlen){
